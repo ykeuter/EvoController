@@ -26,6 +26,7 @@ class AirsimWorld:
         self.client.enableApiControl(True)
         self.client.armDisarm(True)
         self.client.takeoffAsync().join()
+        return self.perceive()
 
     def step(self, action):
         v = self.ACTIONS[np.argmax(action)] * self.SPEED
