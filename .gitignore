@@ -3,3 +3,4 @@
 __pycache__/
 neat.log
 *.pfm
+results/
