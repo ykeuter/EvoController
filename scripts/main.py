@@ -15,13 +15,18 @@
 import os
 
 import click
+import gym
 import neat
 
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 from pytorch_neat.recurrent_net import RecurrentNet
 
-from airsim_controller.airsim_world import AirsimWorld
+# from airsim_controller.airsim_world import AirsimWorld
+
+
+def make_env():
+    return gym.make("CartPole-v0")
 
 
 def make_net(genome, config, bs):
@@ -30,7 +35,7 @@ def make_net(genome, config, bs):
 
 def activate_net(net, states):
     outputs = net.activate(states).numpy()
-    return outputs
+    return (outputs[:, 0] > 0.5).astype(int)
 
 
 @click.command()
@@ -39,7 +44,7 @@ def activate_net(net, states):
 def run(n_generations, max_env_steps):
     # Load the config file, which is assumed to live in
     # the same directory as this script.
-    config_path = os.path.join(os.path.dirname(__file__), "neat.cfg")
+    config_path = os.path.join(os.path.dirname(__file__), "../config/neat.cfg")
     config = neat.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
@@ -48,11 +53,11 @@ def run(n_generations, max_env_steps):
         config_path,
     )
 
-    world = AirsimWorld()
-    world.connect()
+    # world = AirsimWorld()
+    # world.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, max_env_steps=max_env_steps,
-        envs=[world]
+        make_net, activate_net, make_env=make_env, max_env_steps=max_env_steps
+        # envs=[world]
     )
 
     def eval_genomes(genomes, config):
@@ -64,11 +69,12 @@ def run(n_generations, max_env_steps):
     pop.add_reporter(stats)
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
-    logger = LogReporter("neat.log", evaluator.eval_genome)
+    log_path = os.path.join(os.path.dirname(__file__), "../results/neat.log")
+    logger = LogReporter(log_path, evaluator.eval_genome)
     pop.add_reporter(logger)
 
     pop.run(eval_genomes, n_generations)
-    world.disconnect()
+    # world.disconnect()
 
 
 if __name__ == "__main__":

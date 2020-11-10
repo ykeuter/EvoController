@@ -1,6 +1,4 @@
-*.code-workspace
 *.egg-info/
 __pycache__/
-neat.log
-*.pfm
 results/
+.vscode/
