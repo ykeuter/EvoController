@@ -2,7 +2,7 @@ import airsim
 import numpy as np
 
 
-class AirsimWorld:
+class AirSimWorld:
     SPEED = 1.
     DURATION = 1.
     UP = np.array([0, 1, 0])

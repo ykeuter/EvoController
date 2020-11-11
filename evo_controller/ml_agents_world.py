@@ -29,12 +29,20 @@ class MlAgentsWorld:
     def disconnect(self):
         self.env.close()
 
+    def reset(self):
+        self.env.reset()
+        obs, _, _, _ = self.observe()
+        return obs
+
     def step(self, action):
         self.env.set_action_for_agent(self.name, 0, action)
         self.env.step()
+        return self.observe()
+
+    def observe(self):
         decision_steps, terminal_steps = self.env.get_steps(self.name)
-        steps = decision_steps | terminal_steps
-        obs = steps.obs[0]
+        steps = decision_steps if decision_steps else terminal_steps
+        obs = steps.obs[0][0, :]
         reward = steps.reward[0]
         done = len(decision_steps) == 0
         info = {}
