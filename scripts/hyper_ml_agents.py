@@ -29,7 +29,7 @@ from evo_controller.ml_agents_world import MlAgentsWorld
 
 
 batch_size = 1
-DEBUG = False
+DEBUG = True
 
 
 def make_net(genome, config, _batch_size):
@@ -63,7 +63,7 @@ def activate_net(net, states, debug=False, step_num=0):
 
 
 @click.command()
-@click.option("--n_generations", type=int, default=10)
+@click.option("--n_generations", type=int, default=5)
 @click.option("--n_processes", type=int, default=1)
 def run(n_generations, n_processes):
     # Load the config file, which is assumed to live in
@@ -119,11 +119,12 @@ def run(n_generations, n_processes):
 
     winner = pop.run(eval_genomes, n_generations)
 
-    world.disconnect()
-
     print(winner)
     final_performance = evaluator.eval_genome(winner, config)
     print("Final performance: {}".format(final_performance))
+
+    world.disconnect()
+
     generations = reporter.generation + 1
     return generations
 
