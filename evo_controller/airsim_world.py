@@ -26,18 +26,18 @@ class AirsimWorld:
         self.client.enableApiControl(True)
         self.client.armDisarm(True)
         self.client.takeoffAsync().join()
-        return self.perceive()
+        return self.observe()
 
     def step(self, action):
         v = self.ACTIONS[np.argmax(action)] * self.SPEED
         self.client.moveByVelocityAsync(v[0], v[1], v[2], self.DURATION).join()
-        observations = self.perceive()
+        observations = self.observe()
         reward = self.client.simGetHealth()
         done = False
         info = {}
         return observations, reward, done, info
 
-    def perceive(self):
+    def observe(self):
         responses = self.client.simGetImages([
             airsim.ImageRequest(cam, airsim.ImageType.Scene, True)
             for cam in self.CAMS

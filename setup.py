@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="airsim_controller",
+    name="evo_controller",
     version="0.1",
-    packages=["airsim_controller"]
+    packages=["evo_controller"]
 )
