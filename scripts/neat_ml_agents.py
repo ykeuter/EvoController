@@ -15,19 +15,15 @@
 import os
 
 import click
-import gym
 import neat
 
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 from pytorch_neat.recurrent_net import RecurrentNet
 
-# from airsim_controller.airsim_world import AirsimWorld
-from evo_controller.ml_agents_world import MlAgentsWorld
-
-
-def make_env():
-    return gym.make("CartPole-v0")
+# https://github.com/microsoft/vscode-python/issues/14570
+from evo_controller.ml_agents_world \
+    import MlAgentsWorld  # pylint: disable=import-error
 
 
 def make_net(genome, config, bs):
@@ -40,13 +36,13 @@ def activate_net(net, states):
 
 
 @click.command()
-@click.option("--n_generations", type=int, default=100)
+@click.option("--n_generations", type=int, default=1000)
 @click.option("--max_env_steps", type=int, default=None)
 def run(n_generations, max_env_steps):
     # Load the config file, which is assumed to live in
     # the same directory as this script.
     config_path = os.path.join(os.path.dirname(__file__),
-        "../config/neat_ml_agents.cfg")
+                               "../config/neat_ml_agents.cfg")
     config = neat.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
@@ -72,7 +68,7 @@ def run(n_generations, max_env_steps):
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
     log_path = os.path.join(os.path.dirname(__file__),
-        "../results/neat_ml_agents.log")
+                            "../results/neat_ml_agents.log")
     logger = LogReporter(log_path, evaluator.eval_genome)
     pop.add_reporter(logger)
 
