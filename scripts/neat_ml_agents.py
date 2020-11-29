@@ -13,9 +13,10 @@
 #     limitations under the License.
 
 import os
-
+import time
 import click
 import neat
+import dotenv
 
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
@@ -24,6 +25,8 @@ from pytorch_neat.recurrent_net import RecurrentNet
 # https://github.com/microsoft/vscode-python/issues/14570
 from evo_controller.ml_agents_world \
     import MlAgentsWorld  # pylint: disable=import-error
+
+dotenv.load_dotenv()
 
 
 def make_net(genome, config, bs):
@@ -51,7 +54,7 @@ def run(n_generations, max_env_steps):
         config_path,
     )
 
-    world = MlAgentsWorld()
+    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, max_env_steps=max_env_steps,
@@ -67,12 +70,19 @@ def run(n_generations, max_env_steps):
     pop.add_reporter(stats)
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
+    # log_path = os.path.join(os.path.dirname(__file__),
+    #                         "../results/neat_ml_agents.log")
+    # logger = LogReporter(log_path, evaluator.eval_genome)
+    # pop.add_reporter(logger)
     log_path = os.path.join(os.path.dirname(__file__),
-                            "../results/neat_ml_agents.log")
-    logger = LogReporter(log_path, evaluator.eval_genome)
-    pop.add_reporter(logger)
+                            "../results/neat_ml_agents")
+    checker = neat.Checkpointer(100, None, filename_prefix=log_path)
+    pop.add_reporter(checker)
 
+    tic = time.perf_counter()
     pop.run(eval_genomes, n_generations)
+    toc = time.perf_counter()
+    print("Evolution took {} seconds.".format(toc - tic))
     world.disconnect()
 
 

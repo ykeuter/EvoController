@@ -6,9 +6,10 @@ import numpy as np
 
 
 class MlAgentsWorld:
-    def __init__(self):
+    def __init__(self, file_name=None):
         self.env = None
-        self.name = None
+        self.behavior_name = None
+        self.file_name = file_name
 
     def connect(self):
         logging_util.set_log_level(logging_util.INFO)
@@ -21,10 +22,14 @@ class MlAgentsWorld:
             time_scale=20,
             target_frame_rate=-1,
             capture_frame_rate=60)
-        self.env = UnityEnvironment(side_channels=[channel])
+        self.env = UnityEnvironment(
+            file_name=self.file_name,
+            side_channels=[channel],
+            # no_graphics=True,
+        )
         # Start interacting with the environment.
         self.env.reset()
-        self.name = list(self.env.behavior_specs.keys())[0]
+        self.behavior_name = list(self.env.behavior_specs.keys())[0]
 
     def disconnect(self):
         self.env.close()
@@ -35,12 +40,12 @@ class MlAgentsWorld:
         return obs
 
     def step(self, action):
-        self.env.set_action_for_agent(self.name, 0, action)
+        self.env.set_action_for_agent(self.behavior_name, 0, action)
         self.env.step()
         return self.observe()
 
     def observe(self):
-        decision_steps, terminal_steps = self.env.get_steps(self.name)
+        decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
         steps = decision_steps if decision_steps else terminal_steps
         obs = steps.obs[0][0, :]
         reward = steps.reward[0]
