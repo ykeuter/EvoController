@@ -54,7 +54,8 @@ def run(n_generations, max_env_steps):
         config_path,
     )
 
-    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    world = MlAgentsWorld()
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, max_env_steps=max_env_steps,
@@ -76,7 +77,7 @@ def run(n_generations, max_env_steps):
     # pop.add_reporter(logger)
     log_path = os.path.join(os.path.dirname(__file__),
                             "../results/neat_ml_agents")
-    checker = neat.Checkpointer(100, None, filename_prefix=log_path)
+    checker = neat.Checkpointer(10, None, filename_prefix=log_path)
     pop.add_reporter(checker)
 
     tic = time.perf_counter()
