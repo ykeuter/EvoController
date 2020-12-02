@@ -13,11 +13,14 @@
 #     limitations under the License.
 
 import os
+import shutil
+import datetime
 import time
 import click
 import neat
 import dotenv
 
+from pathlib import Path
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 from pytorch_neat.recurrent_net import RecurrentNet
@@ -38,28 +41,21 @@ def activate_net(net, states):
     return outputs
 
 
-@click.command()
-@click.option("--n_generations", type=int, default=1000)
-@click.option("--max_env_steps", type=int, default=None)
-def run(n_generations, max_env_steps):
-    # Load the config file, which is assumed to live in
-    # the same directory as this script.
-    config_path = os.path.join(os.path.dirname(__file__),
-                               "../config/neat_ml_agents.cfg")
+def run(config_file, log_path, n_generations=1000, max_env_steps=None):
+    shutil.copy2(config_file, log_path)
     config = neat.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
         neat.DefaultSpeciesSet,
         neat.DefaultStagnation,
-        config_path,
+        config_file,
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
     world = MlAgentsWorld()
     world.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, max_env_steps=max_env_steps,
-        envs=[world]
+        make_net, activate_net, max_env_steps=max_env_steps, envs=[world]
     )
 
     def eval_genomes(genomes, config):
@@ -75,9 +71,8 @@ def run(n_generations, max_env_steps):
     #                         "../results/neat_ml_agents.log")
     # logger = LogReporter(log_path, evaluator.eval_genome)
     # pop.add_reporter(logger)
-    log_path = os.path.join(os.path.dirname(__file__),
-                            "../results/neat_ml_agents")
-    checker = neat.Checkpointer(10, None, filename_prefix=log_path)
+    prefix = log_path / "neat_ml_agents-"
+    checker = neat.Checkpointer(10, None, filename_prefix=prefix)
     pop.add_reporter(checker)
 
     tic = time.perf_counter()
@@ -88,4 +83,9 @@ def run(n_generations, max_env_steps):
 
 
 if __name__ == "__main__":
-    run()  # pylint: disable=no-value-for-parameter
+    root = Path(__file__).parent.parent
+    config_file = root / "config/neat_ml_agents.cfg"
+    dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    log_path = root / "results" / dt
+    log_path.mkdir()
+    run(config_file, log_path)
