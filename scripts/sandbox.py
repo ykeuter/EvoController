@@ -17,6 +17,7 @@ import time
 import click
 import neat
 import dotenv
+import numpy as np
 
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
@@ -35,6 +36,7 @@ def make_net(genome, config, bs):
 
 def activate_net(net, states):
     outputs = net.activate(states).numpy()
+    outputs = np.array([[0, 0, 0, 0]])
     return outputs
 
 
@@ -56,14 +58,11 @@ def run(config_file, checkpoint_file):
 
     pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
     s = 0
-    tic = time.perf_counter()
     for genome in pop.population.values():
         f = evaluator.eval_genome(genome, config)
         s += f
         print(f)
-    toc = time.perf_counter()
     print(s / len(pop.population))
-    print("Replay took {} seconds.".format(toc - tic))
 
     world.disconnect()
 

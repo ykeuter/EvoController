@@ -18,10 +18,11 @@ class MlAgentsWorld:
         channel.set_configuration_parameters(
             width=84,
             height=84,
-            quality_level=5,
+            quality_level=0,
             time_scale=20,
             target_frame_rate=-1,
-            capture_frame_rate=60)
+            # capture_frame_rate=60
+        )
         self.env = UnityEnvironment(
             file_name=self.file_name,
             side_channels=[channel],
