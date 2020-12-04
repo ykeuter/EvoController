@@ -19,7 +19,7 @@ class MlAgentsWorld:
             width=84,
             height=84,
             quality_level=0,
-            time_scale=20,
+            time_scale=100,
             target_frame_rate=-1,
             # capture_frame_rate=60
         )

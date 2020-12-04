@@ -51,8 +51,8 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
         config_file,
     )
 
-    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    world = MlAgentsWorld()
+    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    # world = MlAgentsWorld()
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, max_env_steps=max_env_steps, envs=[world]

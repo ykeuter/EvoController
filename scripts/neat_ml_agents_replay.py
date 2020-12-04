@@ -47,8 +47,8 @@ def run(config_file, checkpoint_file):
         config_file,
     )
 
-    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    world = MlAgentsWorld()
+    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    # world = MlAgentsWorld()
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, envs=[world]
