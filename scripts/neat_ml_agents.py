@@ -63,14 +63,17 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
             genome.fitness = evaluator.eval_genome(genome, config)
 
     pop = neat.Population(config)
+
     stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
+
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
-    # log_path = os.path.join(os.path.dirname(__file__),
-    #                         "../results/neat_ml_agents.log")
-    # logger = LogReporter(log_path, evaluator.eval_genome)
-    # pop.add_reporter(logger)
+
+    fn = log_path / "neat_ml_agents.log"
+    logger = LogReporter(fn, evaluator.eval_genome)
+    pop.add_reporter(logger)
+
     prefix = log_path / "neat_ml_agents-"
     checker = neat.Checkpointer(10, None, filename_prefix=prefix)
     pop.add_reporter(checker)
