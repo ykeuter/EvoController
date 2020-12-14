@@ -12,10 +12,14 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import multiprocessing
 import os
-
+import shutil
+import datetime
+import time
 import click
 import neat
+import dotenv
 
 # import torch
 import numpy as np
@@ -25,23 +29,23 @@ from pytorch_neat.adaptive_linear_net import AdaptiveLinearNet
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 
-from evo_controller.ml_agents_world import MlAgentsWorld
+# https://github.com/microsoft/vscode-python/issues/14570
+from evo_controller.ml_agents_world \
+    import MlAgentsWorld  # pylint: disable=import-error
 
-
-batch_size = 1
-DEBUG = True
+dotenv.load_dotenv()
 
 
 def make_net(genome, config, _batch_size):
     input_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
-    output_coords = [[0.0, 1.0], [1.0, 0.0]]
+    output_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
     return AdaptiveLinearNet.create(
         genome,
         config,
         input_coords=input_coords,
         output_coords=output_coords,
         weight_threshold=0.4,
-        batch_size=batch_size,
+        batch_size=_batch_size,
         activation=tanh_activation,
         output_activation=tanh_activation,
         device="cpu",
@@ -62,27 +66,21 @@ def activate_net(net, states, debug=False, step_num=0):
     return outputs
 
 
-@click.command()
-@click.option("--n_generations", type=int, default=5)
-@click.option("--n_processes", type=int, default=1)
-def run(n_generations, n_processes):
-    # Load the config file, which is assumed to live in
-    # the same directory as this script.
-    config_path = os.path.join(os.path.dirname(__file__),
-            "../config/hyper_ml_agents.cfg")
+def run(config_file, log_path, n_generations=1000, n_processes=1):
+    shutil.copy2(config_file, log_path)
     config = neat.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
         neat.DefaultSpeciesSet,
         neat.DefaultStagnation,
-        config_path,
+        config_file,
     )
 
-    world = MlAgentsWorld()
+    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    # world = MlAgentsWorld()
     world.connect()
-
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, envs=[world], batch_size=batch_size, max_env_steps=None
+        make_net, activate_net, envs=[world]
     )
 
     if n_processes > 1:
@@ -90,44 +88,44 @@ def run(n_generations, n_processes):
 
         def eval_genomes(genomes, config):
             fitnesses = pool.starmap(
-                evaluator.eval_genome, ((genome, config) for _, genome in genomes)
+                evaluator.eval_genome,
+                ((genome, config) for _, genome in genomes)
             )
             for (_, genome), fitness in zip(genomes, fitnesses):
                 genome.fitness = fitness
 
     else:
-
         def eval_genomes(genomes, config):
-            for i, (_, genome) in enumerate(genomes):
-                try:
-                    genome.fitness = evaluator.eval_genome(
-                        genome, config, debug=DEBUG and i % 100 == 0
-                    )
-                except Exception as e:
-                    print(genome)
-                    raise e
+            for _, genome in genomes:
+                genome.fitness = evaluator.eval_genome(genome, config)
 
     pop = neat.Population(config)
+
     stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
+
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
-    log_path = os.path.join(os.path.dirname(__file__),
-        "../results/hyper_ml_agents.log")
-    logger = LogReporter(log_path, evaluator.eval_genome)
-    pop.add_reporter(logger)
 
-    winner = pop.run(eval_genomes, n_generations)
+    # fn = log_path / "hyper_ml_agents.log"
+    # logger = LogReporter(fn, evaluator.eval_genome)
+    # pop.add_reporter(logger)
 
-    print(winner)
-    final_performance = evaluator.eval_genome(winner, config)
-    print("Final performance: {}".format(final_performance))
+    prefix = log_path / "hyper_ml_agents-"
+    checker = neat.Checkpointer(10, None, filename_prefix=prefix)
+    pop.add_reporter(checker)
 
+    tic = time.perf_counter()
+    pop.run(eval_genomes, n_generations)
+    toc = time.perf_counter()
+    print("Evolution took {} seconds.".format(toc - tic))
     world.disconnect()
-
-    generations = reporter.generation + 1
-    return generations
 
 
 if __name__ == "__main__":
-    run()  # pylint: disable=no-value-for-parameter
+    root = Path(__file__).parent.parent
+    config_file = root / "config/hyper_ml_agents.cfg"
+    dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    log_path = root / "results" / dt
+    log_path.mkdir()
+    run(config_file, log_path)

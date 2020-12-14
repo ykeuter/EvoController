@@ -70,9 +70,9 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     reporter = neat.StdOutReporter(True)
     pop.add_reporter(reporter)
 
-    fn = log_path / "neat_ml_agents.log"
-    logger = LogReporter(fn, evaluator.eval_genome)
-    pop.add_reporter(logger)
+    # fn = log_path / "neat_ml_agents.log"
+    # logger = LogReporter(fn, evaluator.eval_genome)
+    # pop.add_reporter(logger)
 
     prefix = log_path / "neat_ml_agents-"
     checker = neat.Checkpointer(10, None, filename_prefix=prefix)
