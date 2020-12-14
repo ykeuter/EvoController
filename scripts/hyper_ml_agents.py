@@ -20,6 +20,7 @@ import time
 import click
 import neat
 import dotenv
+import pathlib
 
 # import torch
 import numpy as np
@@ -123,7 +124,7 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
 
 
 if __name__ == "__main__":
-    root = Path(__file__).parent.parent
+    root = pathlib.Path(__file__).parent.parent
     config_file = root / "config/hyper_ml_agents.cfg"
     dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     log_path = root / "results" / dt
