@@ -6,20 +6,21 @@ import numpy as np
 
 
 class MlAgentsWorld:
-    def __init__(self, file_name=None):
+    def __init__(self, file_name=None, training=True):
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
+        self.training = training
 
     def connect(self):
         logging_util.set_log_level(logging_util.INFO)
 
         channel = EngineConfigurationChannel()
         channel.set_configuration_parameters(
-            width=84,
-            height=84,
+            width=84 if self.training else 512,
+            height=84 if self.training else 512,
             quality_level=0,
-            time_scale=100,
+            time_scale=100 if self.training else 1,
             target_frame_rate=-1,
             # capture_frame_rate=60
         )
