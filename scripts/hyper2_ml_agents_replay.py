@@ -26,7 +26,7 @@ import pathlib
 import numpy as np
 
 from pytorch_neat.activations import tanh_activation
-from pytorch_neat.adaptive_linear_net import AdaptiveLinearNet
+from pytorch_neat.adaptive_net import AdaptiveNet
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 
@@ -39,31 +39,20 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, _batch_size):
     input_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
+    hidden_coords = [[.5, 0.0], [-.5, 0.0], [0.0, .5], [0.0, -.5]]
     output_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
-    return AdaptiveLinearNet.create(
+    return AdaptiveNet.create(
         genome,
         config,
         input_coords=input_coords,
+        hidden_coords=hidden_coords,
         output_coords=output_coords,
-        # weight_threshold=0.4,
-        batch_size=_batch_size,
-        activation=tanh_activation,
-        output_activation=tanh_activation,
-        device="cpu",
+        device='cpu'
     )
 
 
 def activate_net(net, states, debug=False, step_num=0):
-    if debug and step_num == 1:
-        print("\n" + "=" * 20 + " DEBUG " + "=" * 20)
-        print(net.delta_w_node)
-        print("W init: ", net.input_to_output[0])
     outputs = net.activate(states).cpu().numpy()
-    if debug and (step_num - 1) % 100 == 0:
-        print("\nStep {}".format(step_num - 1))
-        print("Outputs: ", outputs[0])
-        print("Delta W: ", net.delta_w[0])
-        print("W: ", net.input_to_output[0])
     return outputs
 
 
@@ -100,6 +89,6 @@ def run(config_file, checkpoint_file):
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
                                 "../results/20201214220110")
-    config_file = os.path.join(results_path, "hyper_ml_agents.cfg")
-    check_file = os.path.join(results_path, "hyper_ml_agents-109")
+    config_file = os.path.join(results_path, "hyper2_ml_agents.cfg")
+    check_file = os.path.join(results_path, "hyper2_ml_agents-109")
     run(config_file, check_file)

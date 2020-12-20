@@ -26,7 +26,7 @@ import pathlib
 import numpy as np
 
 from pytorch_neat.activations import tanh_activation
-from pytorch_neat.adaptive_linear_net import AdaptiveLinearNet
+from pytorch_neat.adaptive_net import AdaptiveNet
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
 
@@ -39,35 +39,25 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, _batch_size):
     input_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
+    hidden_coords = [[.5, 0.0], [-.5, 0.0], [0.0, .5], [0.0, -.5]]
     output_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
-    return AdaptiveLinearNet.create(
+    return AdaptiveNet.create(
         genome,
         config,
         input_coords=input_coords,
+        hidden_coords=hidden_coords,
         output_coords=output_coords,
-        # weight_threshold=0.4,
-        batch_size=_batch_size,
-        activation=tanh_activation,
-        output_activation=tanh_activation,
-        device="cpu",
+        device='cpu'
     )
 
 
 def activate_net(net, states, debug=False, step_num=0):
-    if debug and step_num == 1:
-        print("\n" + "=" * 20 + " DEBUG " + "=" * 20)
-        print(net.delta_w_node)
-        print("W init: ", net.input_to_output[0])
     outputs = net.activate(states).cpu().numpy()
-    if debug and (step_num - 1) % 100 == 0:
-        print("\nStep {}".format(step_num - 1))
-        print("Outputs: ", outputs[0])
-        print("Delta W: ", net.delta_w[0])
-        print("W: ", net.input_to_output[0])
     return outputs
 
 
-def run(config_file, checkpoint_file):
+def run(config_file, log_path, n_generations=1000, n_processes=1):
+    shutil.copy2(config_file, log_path)
     config = neat.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
@@ -76,30 +66,56 @@ def run(config_file, checkpoint_file):
         config_file,
     )
 
-    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'), training=False)
+    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
     # world = MlAgentsWorld()
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, envs=[world]
     )
 
-    pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
-    s = 0
-    tic = time.perf_counter()
-    for genome in pop.population.values():
-        f = evaluator.eval_genome(genome, config)
-        s += f
-        print(f)
-    toc = time.perf_counter()
-    print(s / len(pop.population))
-    print("Replay took {} seconds.".format(toc - tic))
+    if n_processes > 1:
+        pool = multiprocessing.Pool(processes=n_processes)
 
+        def eval_genomes(genomes, config):
+            fitnesses = pool.starmap(
+                evaluator.eval_genome,
+                ((genome, config) for _, genome in genomes)
+            )
+            for (_, genome), fitness in zip(genomes, fitnesses):
+                genome.fitness = fitness
+
+    else:
+        def eval_genomes(genomes, config):
+            for _, genome in genomes:
+                genome.fitness = evaluator.eval_genome(genome, config)
+
+    pop = neat.Population(config)
+
+    stats = neat.StatisticsReporter()
+    pop.add_reporter(stats)
+
+    reporter = neat.StdOutReporter(True)
+    pop.add_reporter(reporter)
+
+    # fn = log_path / "hyper2_ml_agents.log"
+    # logger = LogReporter(fn, evaluator.eval_genome)
+    # pop.add_reporter(logger)
+
+    prefix = log_path / "hyper2_ml_agents-"
+    checker = neat.Checkpointer(10, None, filename_prefix=prefix)
+    pop.add_reporter(checker)
+
+    tic = time.perf_counter()
+    pop.run(eval_genomes, n_generations)
+    toc = time.perf_counter()
+    print("Evolution took {} seconds.".format(toc - tic))
     world.disconnect()
 
 
 if __name__ == "__main__":
-    results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20201214220110")
-    config_file = os.path.join(results_path, "hyper_ml_agents.cfg")
-    check_file = os.path.join(results_path, "hyper_ml_agents-109")
-    run(config_file, check_file)
+    root = pathlib.Path(__file__).parent.parent
+    config_file = root / "config/hyper2_ml_agents.cfg"
+    dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    log_path = root / "results" / dt
+    log_path.mkdir()
+    run(config_file, log_path)

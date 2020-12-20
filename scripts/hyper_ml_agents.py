@@ -45,7 +45,7 @@ def make_net(genome, config, _batch_size):
         config,
         input_coords=input_coords,
         output_coords=output_coords,
-        weight_threshold=0.4,
+        # weight_threshold=0.4,
         batch_size=_batch_size,
         activation=tanh_activation,
         output_activation=tanh_activation,
@@ -58,7 +58,7 @@ def activate_net(net, states, debug=False, step_num=0):
         print("\n" + "=" * 20 + " DEBUG " + "=" * 20)
         print(net.delta_w_node)
         print("W init: ", net.input_to_output[0])
-    outputs = net.activate(states).numpy()
+    outputs = net.activate(states).cpu().numpy()
     if debug and (step_num - 1) % 100 == 0:
         print("\nStep {}".format(step_num - 1))
         print("Outputs: ", outputs[0])
