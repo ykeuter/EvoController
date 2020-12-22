@@ -99,7 +99,7 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20201214220110")
+                                "../results/20201220170126")
     config_file = os.path.join(results_path, "hyper_ml_agents.cfg")
-    check_file = os.path.join(results_path, "hyper_ml_agents-109")
+    check_file = os.path.join(results_path, "hyper_ml_agents-999")
     run(config_file, check_file)
