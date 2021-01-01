@@ -49,7 +49,13 @@ class MlAgentsWorld:
     def observe(self):
         decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
         steps = terminal_steps if terminal_steps else decision_steps
-        obs = steps.obs[0][0, :]
+
+        backward = 1 - steps.obs[0][0, 1]
+        forward = 1 - steps.obs[1][0, 1]
+        left = 1 - steps.obs[2][0, 1]
+        right = 1 - steps.obs[3][0, 1]
+        obs = [forward, right, backward, left]
+
         reward = steps.reward[0]
         done = len(terminal_steps) != 0
         info = {}
