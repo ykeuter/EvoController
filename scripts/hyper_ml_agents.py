@@ -38,8 +38,9 @@ dotenv.load_dotenv()
 
 
 def make_net(genome, config, _batch_size):
-    input_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
-    output_coords = [[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
+    # forward, right, back, left
+    input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
     return AdaptiveLinearNet.create(
         genome,
         config,
