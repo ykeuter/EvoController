@@ -20,6 +20,7 @@ import click
 import neat
 import dotenv
 import pathlib
+import numpy as np
 
 from pytorch_neat.multi_env_eval import MultiEnvEvaluator
 from pytorch_neat.neat_reporter import LogReporter
@@ -33,12 +34,14 @@ dotenv.load_dotenv()
 
 
 def make_net(genome, config, bs):
-    return RecurrentNet.create(genome, config, bs)
+    # return RecurrentNet.create(genome, config, bs)
+    return RecurrentNet.create(genome, config, 1)
 
 
 def activate_net(net, states):
-    outputs = net.activate(states).numpy()
-    return outputs
+    # return np.array([[0, 0]])
+    outputs = net.activate(states[0]).numpy()
+    return [outputs]
 
 
 def run(config_file, log_path, n_generations=1000, max_env_steps=None):
@@ -52,7 +55,7 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    world = MlAgentsWorld()
+    world = MlAgentsWorld(training=False, num_agents=1, num_inputs=3)
     world.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, max_env_steps=max_env_steps, envs=[world]
