@@ -9,7 +9,7 @@ import numpy as np
 
 class MlAgentsWorld:
     def __init__(self, file_name=None, training=True,
-                 num_agents=1, num_inputs=1, angle=0):
+                 num_agents=1, num_inputs=1, angle=30, worker_id=0):
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
@@ -21,6 +21,7 @@ class MlAgentsWorld:
         self.agent_id_to_index = None
         self.last_idx = None
         self.angle = angle
+        self.worker_id = worker_id
 
     def connect(self):
         logging_util.set_log_level(logging_util.INFO)
@@ -40,6 +41,7 @@ class MlAgentsWorld:
         self.env = UnityEnvironment(
             file_name=self.file_name,
             side_channels=[config_channel, parameters_channel],
+            worker_id=self.worker_id,
             # no_graphics=True,
         )
         # Start interacting with the environment.
@@ -65,21 +67,29 @@ class MlAgentsWorld:
     def observe(self):
         decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
 
-        self.last_idx = None
-        if decision_steps:
-            if not self.agent_id_to_index:
-                self.agent_id_to_index = decision_steps.agent_id_to_index
-            idx = [self.agent_id_to_index[a] for a in decision_steps.agent_id]
-            self.states[idx, 0] = 1 - decision_steps.obs[0][:, 1]  # left
-            self.states[idx, 1] = 1 - decision_steps.obs[1][:, 1]  # forward
-            self.states[idx, 2] = 1 - decision_steps.obs[2][:, 1]  # right
-            self.last_idx = idx
+        steps = terminal_steps if terminal_steps else decision_steps
+        left = 1 - steps.obs[0][0, 1]  # left
+        forward = 1 - steps.obs[1][0, 1]  # forward
+        right = 1 - steps.obs[2][0, 1]  # right
+        obs = [left, forward, right]
 
-        reward = sum(decision_steps.reward) + sum(terminal_steps.reward)
+        # self.last_idx = None
+        # if decision_steps:
+        #     if not self.agent_id_to_index:
+        #         self.agent_id_to_index = decision_steps.agent_id_to_index
+        #     idx = [self.agent_id_to_index[a] for a in decision_steps.agent_id]
+        #     self.states[idx, 0] = 1 - decision_steps.obs[0][:, 1]  # left
+        #     self.states[idx, 1] = 1 - decision_steps.obs[1][:, 1]  # forward
+        #     self.states[idx, 2] = 1 - decision_steps.obs[2][:, 1]  # right
+        #     self.last_idx = idx
 
-        if terminal_steps:
-            self.num_died += len(terminal_steps)
-        done = self.num_died == self.num_agents
+        # reward = sum(decision_steps.reward) + sum(terminal_steps.reward)
+        reward = steps.reward
+
+        # if terminal_steps:
+        #     self.num_died += len(terminal_steps)
+        # done = self.num_died == self.num_agents
+        done = len(terminal_steps) != 0
 
         info = {}
-        return self.states, reward, done, info
+        return obs, reward, done, info

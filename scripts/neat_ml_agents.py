@@ -35,13 +35,13 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, bs):
     # return RecurrentNet.create(genome, config, bs)
-    return RecurrentNet.create(genome, config, 1)
+    return RecurrentNet.create(genome, config, bs)
 
 
 def activate_net(net, states):
-    # return np.array([[0, 0]])
-    outputs = net.activate(states[0]).numpy()
-    return [outputs]
+    # return np.array([[0, 0], [0, 0]])
+    outputs = net.activate(states).numpy()
+    return outputs
 
 
 def run(config_file, log_path, n_generations=1000, max_env_steps=None):
@@ -55,10 +55,16 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    world = MlAgentsWorld(training=False, num_agents=1, num_inputs=3)
-    world.connect()
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WallFollowingAngle"
+    envs = [
+        MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a)
+        for i, a in enumerate([-45, -30, 0, 30, 45])
+    ]
+    for w in envs:
+        w.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, max_env_steps=max_env_steps, envs=[world]
+        make_net, activate_net, max_env_steps=max_env_steps, envs=envs,
+        batch_size=5
     )
 
     def eval_genomes(genomes, config):
@@ -85,7 +91,8 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     pop.run(eval_genomes, n_generations)
     toc = time.perf_counter()
     print("Evolution took {} seconds.".format(toc - tic))
-    world.disconnect()
+    for w in envs:
+        w.disconnect()
 
 
 if __name__ == "__main__":
