@@ -55,10 +55,13 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WallFollowingAngle"
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF3"
+    # fn = None
+    angles = [-45, -30, 0, 30, 45]
+    # angles = [0]
     envs = [
         MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a)
-        for i, a in enumerate([-45, -30, 0, 30, 45])
+        for i, a in enumerate(angles)
     ]
     for w in envs:
         w.connect()

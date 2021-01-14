@@ -31,7 +31,7 @@ class MlAgentsWorld:
             width=84 if self.training else 512,
             height=84 if self.training else 512,
             quality_level=0,
-            time_scale=100 if self.training else 1,
+            time_scale=100 if self.training else 5,
             target_frame_rate=-1,
             # capture_frame_rate=60
         )
@@ -59,8 +59,9 @@ class MlAgentsWorld:
         return obs
 
     def step(self, action):
-        if self.last_idx:
-            self.env.set_actions(self.behavior_name, action[self.last_idx, :])
+        self.env.set_action_for_agent(self.behavior_name, 0, action)
+        # if self.last_idx:
+        #     self.env.set_actions(self.behavior_name, action[self.last_idx, :])
         self.env.step()
         return self.observe()
 
