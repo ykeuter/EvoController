@@ -31,7 +31,7 @@ class MlAgentsWorld:
             width=84 if self.training else 512,
             height=84 if self.training else 512,
             quality_level=0,
-            time_scale=100 if self.training else 5,
+            time_scale=100 if self.training else 1,
             target_frame_rate=-1,
             # capture_frame_rate=60
         )

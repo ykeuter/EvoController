@@ -67,7 +67,7 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
         w.connect()
     evaluator = MultiEnvEvaluator(
         make_net, activate_net, max_env_steps=max_env_steps, envs=envs,
-        batch_size=5
+        batch_size=len(envs)
     )
 
     def eval_genomes(genomes, config):

@@ -47,11 +47,19 @@ def run(config_file, checkpoint_file):
         config_file,
     )
 
-    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'), training=False)
-    # world = MlAgentsWorld()
-    world.connect()
+    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF3"
+    # fn = None
+    # angles = [-45, -30, 0, 30, 45]
+    angles = [0]
+    envs = [
+        MlAgentsWorld(fn, worker_id=i, training=False, num_inputs=3, angle=a)
+        for i, a in enumerate(angles)
+    ]
+    for w in envs:
+        w.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, envs=[world]
+        make_net, activate_net, envs=envs, batch_size=len(envs)
     )
 
     pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
@@ -65,12 +73,13 @@ def run(config_file, checkpoint_file):
     print(s / len(pop.population))
     print("Replay took {} seconds.".format(toc - tic))
 
-    world.disconnect()
+    for w in envs:
+        w.disconnect()
 
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210101223653")
+                                "../results/20210114153314")
     config_file = os.path.join(results_path, "neat_ml_agents.cfg")
-    check_file = os.path.join(results_path, "neat_ml_agents-129")
+    check_file = os.path.join(results_path, "neat_ml_agents-109")
     run(config_file, check_file)
