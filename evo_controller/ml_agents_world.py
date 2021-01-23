@@ -85,6 +85,7 @@ class MlAgentsWorld:
             self.last_idx = idx
 
         reward = sum(decision_steps.reward) + sum(terminal_steps.reward)
+        reward /= self.num_agents
         # reward = steps.reward
 
         if terminal_steps:
