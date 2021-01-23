@@ -35,7 +35,7 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, bs):
     # return RecurrentNet.create(genome, config, bs)
-    return RecurrentNet.create(genome, config, 5)
+    return RecurrentNet.create(genome, config, 1)
 
 
 def activate_net(net, states):
@@ -60,7 +60,8 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     # angles = [-45, -30, 0, 30, 45]
     angles = [0]
     envs = [
-        MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a)
+        MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a,
+                      num_agents=5)
         for i, a in enumerate(angles)
     ]
     for w in envs:
