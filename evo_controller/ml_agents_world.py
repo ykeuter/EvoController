@@ -59,38 +59,38 @@ class MlAgentsWorld:
         return obs
 
     def step(self, action):
-        self.env.set_action_for_agent(self.behavior_name, 0, action)
-        # if self.last_idx:
-        #     self.env.set_actions(self.behavior_name, action[self.last_idx, :])
+        # self.env.set_action_for_agent(self.behavior_name, 0, action)
+        if self.last_idx:
+            self.env.set_actions(self.behavior_name, action[self.last_idx, :])
         self.env.step()
         return self.observe()
 
     def observe(self):
         decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
 
-        steps = terminal_steps if terminal_steps else decision_steps
-        left = 1 - steps.obs[0][0, 1]  # left
-        forward = 1 - steps.obs[1][0, 1]  # forward
-        right = 1 - steps.obs[2][0, 1]  # right
-        obs = [left, forward, right]
+        # steps = terminal_steps if terminal_steps else decision_steps
+        # left = 1 - steps.obs[0][0, 1]  # left
+        # forward = 1 - steps.obs[1][0, 1]  # forward
+        # right = 1 - steps.obs[2][0, 1]  # right
+        # obs = [left, forward, right]
 
-        # self.last_idx = None
-        # if decision_steps:
-        #     if not self.agent_id_to_index:
-        #         self.agent_id_to_index = decision_steps.agent_id_to_index
-        #     idx = [self.agent_id_to_index[a] for a in decision_steps.agent_id]
-        #     self.states[idx, 0] = 1 - decision_steps.obs[0][:, 1]  # left
-        #     self.states[idx, 1] = 1 - decision_steps.obs[1][:, 1]  # forward
-        #     self.states[idx, 2] = 1 - decision_steps.obs[2][:, 1]  # right
-        #     self.last_idx = idx
+        self.last_idx = None
+        if decision_steps:
+            if not self.agent_id_to_index:
+                self.agent_id_to_index = decision_steps.agent_id_to_index
+            idx = [self.agent_id_to_index[a] for a in decision_steps.agent_id]
+            self.states[idx, 0] = 1 - decision_steps.obs[0][:, 1]  # left
+            self.states[idx, 1] = 1 - decision_steps.obs[1][:, 1]  # forward
+            self.states[idx, 2] = 1 - decision_steps.obs[2][:, 1]  # right
+            self.last_idx = idx
 
-        # reward = sum(decision_steps.reward) + sum(terminal_steps.reward)
-        reward = steps.reward
+        reward = sum(decision_steps.reward) + sum(terminal_steps.reward)
+        # reward = steps.reward
 
-        # if terminal_steps:
-        #     self.num_died += len(terminal_steps)
-        # done = self.num_died == self.num_agents
-        done = len(terminal_steps) != 0
+        if terminal_steps:
+            self.num_died += len(terminal_steps)
+        done = self.num_died == self.num_agents
+        # done = len(terminal_steps) != 0
 
         info = {}
-        return obs, reward, done, info
+        return self.states, reward, done, info

@@ -35,13 +35,13 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, bs):
     # return RecurrentNet.create(genome, config, bs)
-    return RecurrentNet.create(genome, config, bs)
+    return RecurrentNet.create(genome, config, 5)
 
 
 def activate_net(net, states):
     # return np.array([[0, 0], [0, 0]])
-    outputs = net.activate(states).numpy()
-    return outputs
+    outputs = net.activate(states[0]).numpy()
+    return [outputs]
 
 
 def run(config_file, log_path, n_generations=1000, max_env_steps=None):
@@ -55,10 +55,10 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF3"
-    # fn = None
-    angles = [-45, -30, 0, 30, 45]
-    # angles = [0]
+    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF3"
+    fn = None
+    # angles = [-45, -30, 0, 30, 45]
+    angles = [0]
     envs = [
         MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a)
         for i, a in enumerate(angles)
