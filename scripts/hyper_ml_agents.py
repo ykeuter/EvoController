@@ -39,15 +39,18 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, _batch_size):
     # forward, right, back, left
-    input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
-    output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    # input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    # output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    input_coords = [[1.0, 0.0], [0.0, 0.0], [-1.0, 0.0]]
+    output_coords = [[0.0, 0.0]]
     return AdaptiveLinearNet.create(
         genome,
         config,
         input_coords=input_coords,
         output_coords=output_coords,
         # weight_threshold=0.4,
-        batch_size=_batch_size,
+        # batch_size=_batch_size,
+        batch_size=5,
         activation=tanh_activation,
         output_activation=tanh_activation,
         device="cpu",
@@ -55,17 +58,17 @@ def make_net(genome, config, _batch_size):
 
 
 def activate_net(net, states, debug=False, step_num=0):
-    if debug and step_num == 1:
-        print("\n" + "=" * 20 + " DEBUG " + "=" * 20)
-        print(net.delta_w_node)
-        print("W init: ", net.input_to_output[0])
-    outputs = net.activate(states).cpu().numpy()
-    if debug and (step_num - 1) % 100 == 0:
-        print("\nStep {}".format(step_num - 1))
-        print("Outputs: ", outputs[0])
-        print("Delta W: ", net.delta_w[0])
-        print("W: ", net.input_to_output[0])
-    return outputs
+    # if debug and step_num == 1:
+    #     print("\n" + "=" * 20 + " DEBUG " + "=" * 20)
+    #     print(net.delta_w_node)
+    #     print("W init: ", net.input_to_output[0])
+    outputs = net.activate(states[0]).cpu().numpy()
+    # if debug and (step_num - 1) % 100 == 0:
+    #     print("\nStep {}".format(step_num - 1))
+    #     print("Outputs: ", outputs[0])
+    #     print("Delta W: ", net.delta_w[0])
+    #     print("W: ", net.input_to_output[0])
+    return [outputs]
 
 
 def run(config_file, log_path, n_generations=1000, n_processes=1):
@@ -78,11 +81,20 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
         config_file,
     )
 
-    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    # world = MlAgentsWorld()
-    world.connect()
+    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
+    # fn = None
+    # angles = [-45, -30, 0, 30, 45]
+    angles = [0]
+    envs = [
+        MlAgentsWorld(fn, worker_id=i, training=False, num_inputs=3, angle=a,
+                      num_agents=5)
+        for i, a in enumerate(angles)
+    ]
+    for w in envs:
+        w.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, envs=[world]
+        make_net, activate_net, envs=envs, batch_size=len(envs)
     )
 
     if n_processes > 1:
@@ -121,7 +133,8 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
     pop.run(eval_genomes, n_generations)
     toc = time.perf_counter()
     print("Evolution took {} seconds.".format(toc - tic))
-    world.disconnect()
+    for w in envs:
+        w.disconnect()
 
 
 if __name__ == "__main__":

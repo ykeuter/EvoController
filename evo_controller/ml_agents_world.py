@@ -28,8 +28,10 @@ class MlAgentsWorld:
 
         config_channel = EngineConfigurationChannel()
         config_channel.set_configuration_parameters(
-            width=84 if self.training else 512,
-            height=84 if self.training else 512,
+            # width=84 if self.training else 512,
+            # height=84 if self.training else 512,
+            width=1024,
+            height=576,
             quality_level=0,
             time_scale=100 if self.training else 1,
             target_frame_rate=-1,
