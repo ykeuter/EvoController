@@ -30,12 +30,15 @@ dotenv.load_dotenv()
 
 
 def make_net(genome, config, bs):
-    return RecurrentNet.create(genome, config, bs)
+    # return RecurrentNet.create(genome, config, bs)
+    return RecurrentNet.create(genome, config, 1)
 
 
 def activate_net(net, states):
-    outputs = net.activate(states).numpy()
-    return outputs
+    # outputs = net.activate(states).numpy()
+    # return outputs
+    outputs = net.activate(states[0]).numpy()
+    return [outputs]
 
 
 def run(config_file, checkpoint_file):
@@ -48,12 +51,13 @@ def run(config_file, checkpoint_file):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF3"
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
     # fn = None
     # angles = [-45, -30, 0, 30, 45]
     angles = [0]
     envs = [
-        MlAgentsWorld(fn, worker_id=i, training=False, num_inputs=3, angle=a)
+        MlAgentsWorld(fn, worker_id=i, training=False, num_inputs=3, angle=a,
+                      num_agents=5)
         for i, a in enumerate(angles)
     ]
     for w in envs:
@@ -79,7 +83,7 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210114153314")
+                                "../results/20210123211305")
     config_file = os.path.join(results_path, "neat_ml_agents.cfg")
-    check_file = os.path.join(results_path, "neat_ml_agents-109")
+    check_file = os.path.join(results_path, "neat_ml_agents-79")
     run(config_file, check_file)
