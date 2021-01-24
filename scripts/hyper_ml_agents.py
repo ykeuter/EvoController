@@ -87,7 +87,7 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
     # angles = [-45, -30, 0, 30, 45]
     angles = [0]
     envs = [
-        MlAgentsWorld(fn, worker_id=i, training=False, num_inputs=3, angle=a,
+        MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a,
                       num_agents=5)
         for i, a in enumerate(angles)
     ]
