@@ -39,22 +39,27 @@ dotenv.load_dotenv()
 
 def make_net(genome, config, _batch_size):
     # forward, right, back, left
-    input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
-    hidden_coords = [[0.0, .5], [.5, 0.0], [0.0, -.5], [-.5, 0.0]]
-    output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    # input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    # hidden_coords = [[0.0, .5], [.5, 0.0], [0.0, -.5], [-.5, 0.0]]
+    # output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
+    # left, forward, right
+    input_coords = [[-1.0, 0.0], [0.0, 0.0], [1.0, 0.0]]
+    hidden_coords = [[-2.0, 1.0], [-1, 1.0], [1.0, 1.0], [2.0, 1.0]]
+    output_coords = [[0.0, 2.0]]
     return AdaptiveNet.create(
         genome,
         config,
         input_coords=input_coords,
         hidden_coords=hidden_coords,
         output_coords=output_coords,
+        batch_size=5,
         device='cpu'
     )
 
 
 def activate_net(net, states, debug=False, step_num=0):
-    outputs = net.activate(states).cpu().numpy()
-    return outputs
+    outputs = net.activate(states[0]).cpu().numpy()
+    return [outputs]
 
 
 def run(config_file, log_path, n_generations=1000, n_processes=1):
@@ -67,11 +72,20 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
         config_file,
     )
 
-    world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    # world = MlAgentsWorld()
-    world.connect()
+    # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
+    # fn = None
+    # angles = [-45, -30, 0, 30, 45]
+    angles = [0]
+    envs = [
+        MlAgentsWorld(fn, worker_id=i, training=True, num_inputs=3, angle=a,
+                      num_agents=5)
+        for i, a in enumerate(angles)
+    ]
+    for w in envs:
+        w.connect()
     evaluator = MultiEnvEvaluator(
-        make_net, activate_net, envs=[world]
+        make_net, activate_net, envs=envs, batch_size=len(envs)
     )
 
     if n_processes > 1:
@@ -110,7 +124,8 @@ def run(config_file, log_path, n_generations=1000, n_processes=1):
     pop.run(eval_genomes, n_generations)
     toc = time.perf_counter()
     print("Evolution took {} seconds.".format(toc - tic))
-    world.disconnect()
+    for w in envs:
+        w.disconnect()
 
 
 if __name__ == "__main__":

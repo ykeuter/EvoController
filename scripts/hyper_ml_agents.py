@@ -41,7 +41,8 @@ def make_net(genome, config, _batch_size):
     # forward, right, back, left
     # input_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
     # output_coords = [[0.0, 1.0], [1.0, 0.0], [0.0, -1.0], [-1.0, 0.0]]
-    input_coords = [[1.0, 0.0], [0.0, 0.0], [-1.0, 0.0]]
+    # left, forward, right
+    input_coords = [[1.0, 0.0], [0.0, 0.0], [-1.0, 0.0]] #  mirrored but ok
     output_coords = [[0.0, 0.0]]
     return AdaptiveLinearNet.create(
         genome,
