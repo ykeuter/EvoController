@@ -1,3 +1,4 @@
+from mlagents_envs.base_env import ActionTuple
 from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel \
     import EngineConfigurationChannel
@@ -63,7 +64,8 @@ class MlAgentsWorld:
     def step(self, action):
         # self.env.set_action_for_agent(self.behavior_name, 0, action)
         if self.last_idx:
-            self.env.set_actions(self.behavior_name, action[self.last_idx, :])
+            tup = ActionTuple(continuous=action[self.last_idx, :])
+            self.env.set_actions(self.behavior_name, tup)
         self.env.step()
         return self.observe()
 

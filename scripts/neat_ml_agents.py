@@ -55,8 +55,8 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
     )
 
     # world = MlAgentsWorld(os.getenv('UNITY_ENV_EXE_DIR'))
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
-    # fn = None
+    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
+    fn = None
     # angles = [-45, -30, 0, 30, 45]
     angles = [0]
     envs = [
