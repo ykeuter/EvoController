@@ -6,17 +6,17 @@ from mlagents_envs.side_channel.environment_parameters_channel \
     import EnvironmentParametersChannel
 from mlagents_envs import logging_util
 import numpy as np
+from evo_controller.channels.birth_channel import BirthChannel
 
 
-class MlAgentsWorld:
-    def __init__(self, file_name=None, training=True,
-                 num_agents=1, num_inputs=1, angle=30, worker_id=0):
+class OpenWorld:
+    def __init__(self, population, file_name=None, training=True, worker_id=0):
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
         self.training = training
-        self.num_inputs = num_inputs
         self.worker_id = worker_id
+        self.population = population
 
     def connect(self):
         logging_util.set_log_level(logging_util.INFO)
@@ -33,9 +33,11 @@ class MlAgentsWorld:
             # capture_frame_rate=60
         )
 
+        birth_channel = BirthChannel(self.population)
+
         self.env = UnityEnvironment(
             file_name=self.file_name,
-            side_channels=[config_channel],
+            side_channels=[config_channel, birth_channel],
             worker_id=self.worker_id,
             # no_graphics=True,
         )
