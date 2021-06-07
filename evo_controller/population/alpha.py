@@ -15,5 +15,11 @@ class Alpha(BasePopulation):
         genome_dict = dict(parameters.items(self.genome_type.__name__))
         self.genome_config = self.genome_type.parse_config(genome_dict)
 
-    def activate(obs):
-        pass
+    def activate(self, decision_steps):
+        print("activate")
+        tup = ActionTuple(continuous=action[self.last_idx, :])
+
+    def terminate(self, terminal_steps):
+        print("terminate")
+        for id in terminal_steps.agent_id:
+            del self.agents[id]
