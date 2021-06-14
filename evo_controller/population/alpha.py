@@ -15,27 +15,30 @@ class Alpha(BasePopulation):
 
     def config(self, fn):
         parameters = ConfigParser()
-        parameters.read_file(fn)
+        with open(fn) as f:
+            parameters.read_file(f)
         genome_dict = dict(parameters.items(self.genome_type.__name__))
         self.genome_config = self.genome_type.parse_config(genome_dict)
 
     def activate(self, decision_steps):
-        print("activate")
         actions = np.array([
-            self.agents[id].phenotype.activate(row) for id, row in
-            zip(decision_steps.agent_id, decision_steps.obs[0])
+            self.agents[id].phenotype.activate(np.ravel(row))
+            for id, row
+            in zip(decision_steps.agent_id, decision_steps.obs[0])
         ])
         return ActionTuple(continuous=actions)
 
     def terminate(self, terminal_steps):
-        print("terminate")
         for id in terminal_steps.agent_id:
+            print("terminate {}".format(id))
             del self.agents[id]
 
     def add_agent(self, id, parent1_id, parent2_id):
         # parent2 is not supported
+        print("conceive {} ({})".format(id, parent1_id))
         genome = self.genome_type(id)
-        if parent1_id == 0:
+        genome.fitness = -1
+        if parent1_id < 0:
             genome.configure_new(self.genome_config)
         else:
             parent = self.agents[parent1_id].genotype

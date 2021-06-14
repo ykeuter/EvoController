@@ -53,7 +53,9 @@ class OpenWorld:
         while True:
             decision_steps, terminal_steps = self.env.get_steps(
                 self.behavior_name)
-            self.population.terminate(terminal_steps)
-            actions = self.population.activate(decision_steps)
-            self.env.set_actions(self.behavior_name, actions)
+            if terminal_steps:
+                self.population.terminate(terminal_steps)
+            if decision_steps:
+                actions = self.population.activate(decision_steps)
+                self.env.set_actions(self.behavior_name, actions)
             self.env.step()
