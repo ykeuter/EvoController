@@ -2,6 +2,9 @@ from neat import DefaultGenome
 from configparser import ConfigParser
 from .base_population import BasePopulation
 from .agent import Agent
+from neat.nn import FeedForwardNetwork, feed_forward
+import numpy as np
+from mlagents_envs.base_env import ActionTuple
 
 
 class Alpha(BasePopulation):
@@ -18,7 +21,11 @@ class Alpha(BasePopulation):
 
     def activate(self, decision_steps):
         print("activate")
-        tup = ActionTuple(continuous=action[self.last_idx, :])
+        actions = np.array([
+            self.agents[id].phenotype.activate(row) for id, row in
+            zip(decision_steps.agent_id, decision_steps.obs[0])
+        ])
+        return ActionTuple(continuous=actions)
 
     def terminate(self, terminal_steps):
         print("terminate")
@@ -34,5 +41,5 @@ class Alpha(BasePopulation):
             parent = self.agents[parent1_id].genotype
             genome.configure_crossover(parent, parent, self.genome_config)
             genome.mutate(self.genome_config)
-        # phenotype
-        self.agents[id] = Agent(genome, phenotype)
+        pheno = FeedForwardNetwork.create(genome, self)
+        self.agents[id] = Agent(genome, pheno)
