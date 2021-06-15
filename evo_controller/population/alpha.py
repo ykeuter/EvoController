@@ -23,6 +23,7 @@ class Alpha(BasePopulation):
     def activate(self, decision_steps):
         actions = np.array([
             self.agents[id].phenotype.activate(np.ravel(row))
+            # [0]
             for id, row
             in zip(decision_steps.agent_id, decision_steps.obs[0])
         ])
