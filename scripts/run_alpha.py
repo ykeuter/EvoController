@@ -1,5 +1,5 @@
 import pathlib
-import logging
+import logging.config
 import json
 
 from evo_controller.worlds.open_world import OpenWorld

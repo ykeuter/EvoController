@@ -49,6 +49,6 @@ class Alpha(BasePopulation):
             genome.configure_crossover(parent, parent, self.genome_config)
             genome.mutate(self.genome_config)
         self.logger.info("{}|{}|{}|{}".format(
-            id, parent1_id, parent2_id, self.encoder(genome)))
+            id, parent1_id, parent2_id, self.encoder.encode(genome)))
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)

@@ -1,3 +1,4 @@
+from evo_controller.channels.age_channel import AgeChannel
 from mlagents_envs.base_env import ActionTuple
 from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel \
@@ -7,6 +8,7 @@ from mlagents_envs.side_channel.environment_parameters_channel \
 from mlagents_envs import logging_util
 import numpy as np
 from evo_controller.channels.birth_channel import BirthChannel
+from evo_controller.channels.age_channel import AgeChannel
 
 
 class OpenWorld:
@@ -34,10 +36,11 @@ class OpenWorld:
         )
 
         birth_channel = BirthChannel(self.population)
+        age_channel = AgeChannel()
 
         self.env = UnityEnvironment(
             file_name=self.file_name,
-            side_channels=[config_channel, birth_channel],
+            side_channels=[config_channel, birth_channel, age_channel],
             worker_id=self.worker_id,
             # no_graphics=True,
         )
