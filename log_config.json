@@ -1,0 +1,27 @@
+{
+    "version": 1,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple"
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "evo.log",
+            "formatter": "simple"
+        }
+    },
+    "loggers": {
+        "evo_controller": {
+            "level": "INFO",
+            "handlers": ["file", "console"]
+        }
+    },
+    "formatters": {
+        "simple": {
+            "()": "evo_controller.formatters.utc_formatter.UtcFormatter",
+            "style": "{",
+            "format": "{asctime}|{name}|{message}"
+        }
+    }
+}

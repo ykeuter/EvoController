@@ -4,6 +4,7 @@ from .base_population import BasePopulation
 from .agent import Agent
 from neat.nn import FeedForwardNetwork, feed_forward
 import numpy as np
+import logging
 from mlagents_envs.base_env import ActionTuple
 
 
@@ -12,6 +13,7 @@ class Alpha(BasePopulation):
         self.agents = {}
         self.genome_type = DefaultGenome
         self.genome_config = None
+        self.logger = logging.getLogger(__name__)
 
     def config(self, fn):
         parameters = ConfigParser()
@@ -45,5 +47,7 @@ class Alpha(BasePopulation):
             parent = self.agents[parent1_id].genotype
             genome.configure_crossover(parent, parent, self.genome_config)
             genome.mutate(self.genome_config)
+        self.logger.info("{}|{}|{}|{}".format(
+            id, parent1_id, parent2_id, genome))
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)
