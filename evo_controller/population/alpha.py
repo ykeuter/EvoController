@@ -2,25 +2,26 @@ from neat import DefaultGenome
 from configparser import ConfigParser
 from .base_population import BasePopulation
 from .agent import Agent
-from neat.nn import FeedForwardNetwork, feed_forward
+from neat.nn import FeedForwardNetwork
 import numpy as np
 import logging
 from mlagents_envs.base_env import ActionTuple
+from evo_controller.codecs.default_genome_encoder import DefaultGenomeEncoder
 
 
 class Alpha(BasePopulation):
     def __init__(self):
         self.agents = {}
-        self.genome_type = DefaultGenome
         self.genome_config = None
         self.logger = logging.getLogger(__name__)
+        self.encoder = DefaultGenomeEncoder(separators=(",", ":"))
 
     def config(self, fn):
         parameters = ConfigParser()
         with open(fn) as f:
             parameters.read_file(f)
-        genome_dict = dict(parameters.items(self.genome_type.__name__))
-        self.genome_config = self.genome_type.parse_config(genome_dict)
+        genome_dict = dict(parameters.items(DefaultGenome.__name__))
+        self.genome_config = DefaultGenome.parse_config(genome_dict)
 
     def activate(self, decision_steps):
         actions = np.array([
@@ -39,7 +40,7 @@ class Alpha(BasePopulation):
     def add_agent(self, id, parent1_id, parent2_id):
         # parent2 is not supported
         print("conceive {} ({})".format(id, parent1_id))
-        genome = self.genome_type(id)
+        genome = DefaultGenome(id)
         genome.fitness = -1
         if parent1_id < 0:
             genome.configure_new(self.genome_config)
@@ -48,6 +49,6 @@ class Alpha(BasePopulation):
             genome.configure_crossover(parent, parent, self.genome_config)
             genome.mutate(self.genome_config)
         self.logger.info("{}|{}|{}|{}".format(
-            id, parent1_id, parent2_id, genome))
+            id, parent1_id, parent2_id, self.encoder(genome)))
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)
