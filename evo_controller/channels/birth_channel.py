@@ -9,7 +9,7 @@ class BirthChannel(SideChannel):
         self.population = population
 
     def on_message_received(self, msg: IncomingMessage) -> None:
-        print("birth msg received")
+        # print("birth msg received")
         child_id = msg.read_int32()
         parent1_id = msg.read_int32(-1)
         parent2_id = msg.read_int32(-1)
