@@ -15,7 +15,7 @@
     "loggers": {
         "evo_controller": {
             "level": "INFO",
-            "handlers": ["file", "console"]
+            "handlers": ["file"]
         }
     },
     "formatters": {
