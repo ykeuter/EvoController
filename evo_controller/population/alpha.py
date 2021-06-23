@@ -34,12 +34,13 @@ class Alpha(BasePopulation):
 
     def terminate(self, terminal_steps):
         for id in terminal_steps.agent_id:
-            print("terminate {}".format(id))
+            self.logger.info("death|{}".format(id))
+            # print("terminate {}".format(id))
             del self.agents[id]
 
     def add_agent(self, id, parent1_id, parent2_id):
         # parent2 is not supported
-        print("conceive {} ({})".format(id, parent1_id))
+        # print("conceive {} ({})".format(id, parent1_id))
         genome = DefaultGenome(id)
         genome.fitness = -1
         if parent1_id < 0:
@@ -48,7 +49,7 @@ class Alpha(BasePopulation):
             parent = self.agents[parent1_id].genotype
             genome.configure_crossover(parent, parent, self.genome_config)
             genome.mutate(self.genome_config)
-        self.logger.info("{}|{}|{}|{}".format(
+        self.logger.info("birth|{}|{}|{}|{}".format(
             id, parent1_id, parent2_id, self.encoder.encode(genome)))
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)

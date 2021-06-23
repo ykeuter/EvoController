@@ -10,6 +10,6 @@ class AgeChannel(SideChannel):
         self.logger = logging.getLogger(__name__)
 
     def on_message_received(self, msg: IncomingMessage) -> None:
-        print("age msg received")
+        # print("age msg received")
         age = msg.read_float32()
-        self.logger.info(age)
+        self.logger.info("age|{}".format(age))
