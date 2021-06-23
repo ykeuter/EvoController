@@ -1,15 +1,20 @@
 import pathlib
 import logging.config
 import json
+import dotenv
+import os
 
 from evo_controller.worlds.open_world import OpenWorld
 from evo_controller.population.alpha import Alpha
+
+dotenv.load_dotenv()
 
 
 def run(config_file):
     p = Alpha()
     p.config(config_file)
-    w = OpenWorld(p, None, False)
+    fn = os.getenv('UNITY_ENV_EXE_DIR')
+    w = OpenWorld(p, fn, True)
     w.connect()
     w.run()
 
