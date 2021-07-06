@@ -46,12 +46,11 @@ class LogAnalyzer:
                 "max": q[4],
                 "avg": np.mean(a)
             }
-            df2.append(d, ignore_index=True)
+            df2 = df2.append(d, ignore_index=True)
 
         self.population_stats = df
         self.offspring_stats = df2
 
-
-def write(self, population_fn, offspring_fn):
-    self.population_stats.to_csv(population_fn, index=False)
-    self.offspring_stats.to_csv(offspring_fn, index=False)
+    def write(self, population_fn, offspring_fn):
+        self.population_stats.to_csv(population_fn, index=False)
+        self.offspring_stats.to_csv(offspring_fn, index=False)
