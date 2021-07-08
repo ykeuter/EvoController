@@ -14,6 +14,7 @@ class LogAnalyzer:
             df = pd.DataFrame(columns=["age", "births", "deaths"])
             for row in reader:
                 if row[2] == "age":
+                    print(row[3])
                     d = {
                         "age": int(float(row[3])),
                         "births": nbirth,
