@@ -14,7 +14,7 @@ def replay(config_file, gene_file):
     p = Alpha()
     p.config(config_file)
     p.load_gene_pool(gene_file)
-    w = OpenWorld(p)
+    w = OpenWorld(p, training=False)
     w.connect()
     w.run()
 
@@ -22,7 +22,7 @@ def replay(config_file, gene_file):
 if __name__ == "__main__":
     root = pathlib.Path(__file__).parent.parent
     config_file = root / "config/alpha.cfg"
-    gene_file = root / "genomes.txt"
+    gene_file = root / "pop800k.txt"
     with open(root / "log_config.json") as fp:
         logging.config.dictConfig(json.load(fp))
     replay(config_file, gene_file)
