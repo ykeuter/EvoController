@@ -5,8 +5,10 @@ from .agent import Agent
 from neat.nn import FeedForwardNetwork
 import numpy as np
 import logging
+import json
 from mlagents_envs.base_env import ActionTuple
 from evo_controller.codecs.default_genome_encoder import DefaultGenomeEncoder
+from evo_controller.codecs.default_genome_decoder import DefaultGenomeDecoder
 
 
 class Alpha(BasePopulation):
@@ -54,13 +56,22 @@ class Alpha(BasePopulation):
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)
 
-    def init_gene_pool(self, genes):
+    def set_gene_pool(self, genes):
         # parent2 is not supported
         # print("conceive {} ({})".format(id, parent1_id))
         self.agents = {
             i: Agent(g, FeedForwardNetwork.create(g, self))
             for i, g in enumerate(genes)
         }
+
+    def load_gene_pool(self, fn):
+        decoder = DefaultGenomeDecoder()
+        with open(fn) as f:
+            genes = [
+                json.loads(line, object_hook=decoder.as_default_genome)
+                for line in f
+            ]
+        self.set_gene_pool(genes)
 
     def __len__(self):
         return len(self.agents)
