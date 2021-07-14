@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-class LogAnalyzer:
+class StatsAnalyzer:
     def read(self, fn):
         with open(fn) as f:
             reader = csv.reader(f, delimiter="|")
