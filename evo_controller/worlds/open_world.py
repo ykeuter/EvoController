@@ -35,12 +35,17 @@ class OpenWorld:
             # capture_frame_rate=60
         )
 
+        parameters_channel = EnvironmentParametersChannel()
+        parameters_channel.set_float_parameter(
+            "init_pop_size", len(self.population))
+
         birth_channel = BirthChannel(self.population)
         age_channel = AgeChannel()
 
         self.env = UnityEnvironment(
             file_name=self.file_name,
-            side_channels=[config_channel, birth_channel, age_channel],
+            side_channels=[config_channel, parameters_channel,
+                           birth_channel, age_channel],
             worker_id=self.worker_id,
             # no_graphics=True,
         )

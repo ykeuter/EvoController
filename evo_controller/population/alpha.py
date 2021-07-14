@@ -53,3 +53,14 @@ class Alpha(BasePopulation):
             id, parent1_id, parent2_id, self.encoder.encode(genome)))
         pheno = FeedForwardNetwork.create(genome, self)
         self.agents[id] = Agent(genome, pheno)
+
+    def init_gene_pool(self, genes):
+        # parent2 is not supported
+        # print("conceive {} ({})".format(id, parent1_id))
+        self.agents = {
+            i: Agent(g, FeedForwardNetwork.create(g, self))
+            for i, g in enumerate(genes)
+        }
+
+    def __len__(self):
+        return len(self.agents)
