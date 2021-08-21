@@ -9,8 +9,7 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, file_name=None, training=True,
-                 num_agents=1, num_inputs=1, worker_id=0):
+    def __init__(self, file_name=None, training=True, worker_id=0):
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
