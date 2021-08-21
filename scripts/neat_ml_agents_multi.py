@@ -6,9 +6,8 @@ import pathlib
 
 from neat.nn import FeedForwardNetwork
 
-# https://github.com/microsoft/vscode-python/issues/14570
-from evo_controller.ml_agents_multi_world \
-    import MlAgentsMultiWorld  # pylint: disable=import-error
+from evo_controller.worlds.ml_agents_multi_world \
+    import MlAgentsMultiWorld
 
 
 def run(config_file, log_path, n_generations=1000, max_env_steps=None):
