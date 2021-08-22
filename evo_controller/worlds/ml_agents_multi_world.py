@@ -9,7 +9,8 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, file_name=None, training=False, worker_id=0):
+    def __init__(self, pop_size, file_name=None, training=False, worker_id=0):
+        self.pop_size = pop_size
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
@@ -47,13 +48,18 @@ class MlAgentsMultiWorld:
         self.env.close()
 
     def evaluate(self, brains):
-        rewards = [0] * len(brains)
-        num_died = 0
+        n = len(brains)
+        rewards = [None] * n
+        if n != self.pop_size:
+            print("Pop size {} vs expected {}.".format(n, self.pop_size))
+        num_done = 0
         self.env.reset()
-        while num_died < len(brains):
+        while num_done < len(brains):
             decision_steps, terminal_steps = \
                 self.env.get_steps(self.behavior_name)
             for i in decision_steps.agent_id:
+                if i >= n:
+                    continue
                 obs = decision_steps[i].obs
                 action = brains[i].activate(np.ravel(obs))
                 self.env.set_action_for_agent(
@@ -62,7 +68,11 @@ class MlAgentsMultiWorld:
                     ActionTuple(continuous=np.array([action]))
                 )
             for i in terminal_steps.agent_id:
+                if i >= n:
+                    continue
                 rewards[i] = terminal_steps[i].reward
-            num_died += len(terminal_steps)
+            num_done += len(terminal_steps)
             self.env.step()
+        if n > self.pop_size:
+            rewards[self.pop_size:] = rewards[-1] * (n - self.pop_size)
         return rewards
