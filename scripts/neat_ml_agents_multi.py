@@ -20,9 +20,9 @@ def run(config_file, log_path, n_generations=1000, max_env_steps=None):
         config_file,
     )
 
-    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\WF4"
     fn = None
-    world = MlAgentsMultiWorld(config.pop_size, fn)
+    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
+    world = MlAgentsMultiWorld(config.pop_size, fn, training=True)
     world.connect()
 
     def eval_genomes(genomes, config):
