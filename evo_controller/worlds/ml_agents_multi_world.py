@@ -9,7 +9,7 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, file_name=None, training=True, worker_id=0):
+    def __init__(self, file_name=None, training=False, worker_id=0):
         self.env = None
         self.behavior_name = None
         self.file_name = file_name
@@ -53,15 +53,16 @@ class MlAgentsMultiWorld:
         while num_died < len(brains):
             decision_steps, terminal_steps = \
                 self.env.get_steps(self.behavior_name)
-            for ds in decision_steps:
-                action = brains[ds.agent_id].activate(ds.obs)
+            for i in decision_steps.agent_id:
+                obs = decision_steps[i].obs
+                action = brains[i].activate(np.ravel(obs))
                 self.env.set_action_for_agent(
                     self.behavior_name,
-                    ds.agent_id,
-                    ActionTuple(continuous=action)
+                    i,
+                    ActionTuple(continuous=np.array([action]))
                 )
-            for ts in terminal_steps:
-                rewards[ts.agent_id] = ts.reward
+            for i in terminal_steps.agent_id:
+                rewards[i] = terminal_steps[i].reward
             num_died += len(terminal_steps)
             self.env.step()
         return rewards
