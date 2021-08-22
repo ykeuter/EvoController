@@ -10,7 +10,7 @@ from evo_controller.worlds.ml_agents_multi_world \
     import MlAgentsMultiWorld
 
 
-def run(config_file, log_path, n_generations=1000, max_env_steps=None):
+def run(config_file, log_path, n_generations=1000):
     shutil.copy2(config_file, log_path)
     config = neat.Config(
         neat.DefaultGenome,
