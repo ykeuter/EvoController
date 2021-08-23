@@ -49,7 +49,7 @@ class MlAgentsMultiWorld:
 
     def evaluate(self, brains):
         n = len(brains)
-        rewards = [None] * n
+        rewards = [0] * n
         if n != self.pop_size:
             print("Pop size {} vs expected {}.".format(n, self.pop_size))
         num_done = 0
@@ -61,7 +61,9 @@ class MlAgentsMultiWorld:
                 if i >= n:
                     continue
                 obs = decision_steps[i].obs
+                rewards[i] += decision_steps[i].reward
                 action = brains[i].activate(np.ravel(obs))
+                # action = [0, 1]
                 self.env.set_action_for_agent(
                     self.behavior_name,
                     i,
@@ -70,9 +72,10 @@ class MlAgentsMultiWorld:
             for i in terminal_steps.agent_id:
                 if i >= n:
                     continue
-                rewards[i] = terminal_steps[i].reward
+                # print(terminal_steps[i].reward)
+                rewards[i] += terminal_steps[i].reward
             num_done += len(terminal_steps)
             self.env.step()
-        if n > self.pop_size:
-            rewards[self.pop_size:] = rewards[-1] * (n - self.pop_size)
+        # if n > self.pop_size:
+        #     rewards[self.pop_size:] = [rewards[0]] * (n - self.pop_size)
         return rewards
