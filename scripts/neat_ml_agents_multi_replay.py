@@ -21,7 +21,7 @@ def run(config_file, checkpoint_file):
 
     fn = None
     # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(config.pop_size, fn, training=False)
+    world = MlAgentsMultiWorld(config.pop_size, file_name=fn, training=False)
     world.connect()
     pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
     tic = time.perf_counter()

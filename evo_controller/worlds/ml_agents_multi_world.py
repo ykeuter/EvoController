@@ -9,8 +9,10 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, pop_size, file_name=None, training=False, worker_id=0):
+    def __init__(self, pop_size, num_cases=4,
+                 file_name=None, training=False, worker_id=0):
         self.pop_size = pop_size
+        self.num_cases = num_cases
         self.env = None
         self.parameters_channel = EnvironmentParametersChannel()
         self.behavior_name = None
