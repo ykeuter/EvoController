@@ -12,6 +12,7 @@ class MlAgentsMultiWorld:
     def __init__(self, pop_size, file_name=None, training=False, worker_id=0):
         self.pop_size = pop_size
         self.env = None
+        self.parameters_channel = EnvironmentParametersChannel()
         self.behavior_name = None
         self.file_name = file_name
         self.training = training
@@ -32,11 +33,11 @@ class MlAgentsMultiWorld:
             # capture_frame_rate=60
         )
 
-        parameters_channel = EnvironmentParametersChannel()
+        # self.parameters_channel = EnvironmentParametersChannel()
         # parameters_channel.set_float_parameter("angle", self.angle)
         self.env = UnityEnvironment(
             file_name=self.file_name,
-            side_channels=[config_channel, parameters_channel],
+            side_channels=[config_channel, self.parameters_channel],
             worker_id=self.worker_id,
             # no_graphics=True,
         )
@@ -48,11 +49,17 @@ class MlAgentsMultiWorld:
         self.env.close()
 
     def evaluate(self, brains):
+        list_of_rewards = [
+            self._evaluate_case(brains, c) for c in range(self.num_cases)]
+        return [sum(r) for r in zip(*list_of_rewards)]
+
+    def _evaluate_case(self, brains, case_id):
         n = len(brains)
         rewards = [0] * n
-        if n != self.pop_size:
-            print("Pop size {} vs expected {}.".format(n, self.pop_size))
+        # if n != self.pop_size:
+        #     print("Pop size {} vs expected {}.".format(n, self.pop_size))
         num_done = 0
+        self.parameters_channel.set_float_parameter("case_id", case_id)
         self.env.reset()
         while num_done < len(brains):
             decision_steps, terminal_steps = \
