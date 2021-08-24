@@ -21,7 +21,7 @@ def run(config_file, log_path, n_generations=1000):
     )
 
     fn = None
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
+    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
     world = MlAgentsMultiWorld(config.pop_size, fn, training=True)
     world.connect()
 

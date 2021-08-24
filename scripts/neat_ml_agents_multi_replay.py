@@ -20,8 +20,8 @@ def run(config_file, checkpoint_file):
     )
 
     fn = None
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(config.pop_size, fn, training=True)
+    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
+    world = MlAgentsMultiWorld(config.pop_size, fn, training=False)
     world.connect()
     pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
     tic = time.perf_counter()
@@ -37,7 +37,7 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210823191142")
+                                "../results/20210823225834")
     config_file = os.path.join(results_path, "neat-ml-agents-multi.cfg")
-    check_file = os.path.join(results_path, "neat-ml-agents-multi-409")
+    check_file = os.path.join(results_path, "neat-ml-agents-multi-999")
     run(config_file, check_file)
