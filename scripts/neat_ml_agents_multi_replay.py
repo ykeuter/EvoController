@@ -42,7 +42,7 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210825181816")
+                                "../results/20210825185209")
     config_file = os.path.join(results_path, "neat-ml-agents-multi.cfg")
     check_file = os.path.join(results_path, "neat-ml-agents-multi-689")
     check_file = os.path.join(results_path, "winner.pickle")

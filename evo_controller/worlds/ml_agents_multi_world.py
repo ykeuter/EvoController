@@ -9,9 +9,10 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, num_cases=4,
+    def __init__(self, num_cases=4, pop_size=1,
                  file_name=None, training=False, worker_id=0):
         self.num_cases = num_cases
+        self.pop_size = pop_size
         self.env = None
         self.parameters_channel = EnvironmentParametersChannel()
         self.behavior_name = None
@@ -56,24 +57,32 @@ class MlAgentsMultiWorld:
         num_done = 0
         self.parameters_channel.set_float_parameter("case_id", case_id)
         self.env.reset()
+        steps = 0
         while True:
             decision_steps, terminal_steps = \
                 self.env.get_steps(self.behavior_name)
+            if steps == 0:
+                if len(terminal_steps) > 0:
+                    raise ValueError
+                # self.ts = []
+            # self.ts.append(terminal_steps)
             for i in terminal_steps.agent_id:
                 if i >= n:
                     continue
                 rewards[i] += terminal_steps[i].reward
             num_done += len(terminal_steps)
-            if num_done == n:
+            if num_done == self.pop_size:
                 break
-            if num_done > n:
+            if num_done > self.pop_size:
                 raise ValueError
 
             for i in decision_steps.agent_id:
                 if i >= n:
                     continue
                 obs = decision_steps[i].obs
-                rewards[i] += decision_steps[i].reward
+                # rewards[i] += decision_steps[i].reward
+                if abs(decision_steps[i].reward) > 0:
+                    raise ValueError
                 action = brains[i].activate(np.ravel(obs))
                 # action = [0, 1]
                 self.env.set_action_for_agent(
@@ -82,4 +91,5 @@ class MlAgentsMultiWorld:
                     ActionTuple(continuous=np.array([action]))
                 )
             self.env.step()
+            steps += 1
         return rewards
