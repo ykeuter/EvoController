@@ -3,6 +3,7 @@ import time
 import click
 import neat
 import dotenv
+import pickle
 
 from neat.nn import FeedForwardNetwork
 
@@ -21,15 +22,19 @@ def run(config_file, checkpoint_file):
 
     fn = None
     # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(config.pop_size, file_name=fn, training=False)
+    world = MlAgentsMultiWorld(file_name=fn, training=False)
     world.connect()
-    pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
+    # pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
+    # phenos = [FeedForwardNetwork.create(g, config)
+    #           for g in pop.population.values()]
+    with open(checkpoint_file, "rb") as f:
+        g = pickle.load(f)
+        phenos = [FeedForwardNetwork.create(g, config)]
     tic = time.perf_counter()
-    phenos = [FeedForwardNetwork.create(g, config)
-              for g in pop.population.values()]
-    fitnesses = world.evaluate(phenos)
-    print(fitnesses)
-    print(sum(fitnesses) / len(fitnesses))
+    for _ in range(10):
+        fitnesses = world.evaluate(phenos)
+        print(fitnesses)
+    # print(sum(fitnesses) / len(fitnesses))
     toc = time.perf_counter()
     print("Replay took {} seconds.".format(toc - tic))
     world.disconnect()
@@ -37,7 +42,8 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210824121155")
+                                "../results/20210825181816")
     config_file = os.path.join(results_path, "neat-ml-agents-multi.cfg")
     check_file = os.path.join(results_path, "neat-ml-agents-multi-689")
+    check_file = os.path.join(results_path, "winner.pickle")
     run(config_file, check_file)

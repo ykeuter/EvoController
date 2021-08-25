@@ -3,6 +3,7 @@ import datetime
 import time
 import neat
 import pathlib
+import pickle
 
 from neat.nn import FeedForwardNetwork
 
@@ -22,7 +23,7 @@ def run(config_file, log_path, n_generations=1000):
 
     fn = None
     # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(config.pop_size, file_name=fn, training=False)
+    world = MlAgentsMultiWorld(file_name=fn, training=False)
     world.connect()
 
     def eval_genomes(genomes, config):
@@ -48,10 +49,13 @@ def run(config_file, log_path, n_generations=1000):
     pop.add_reporter(checker)
 
     tic = time.perf_counter()
-    pop.run(eval_genomes, n_generations)
+    winner = pop.run(eval_genomes, n_generations)
     toc = time.perf_counter()
     print("Evolution took {} seconds.".format(toc - tic))
     world.disconnect()
+
+    with open(log_path / "winner.pickle", "wb") as f:
+        pickle.dump(winner, f)
 
 
 if __name__ == "__main__":

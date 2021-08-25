@@ -9,9 +9,8 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, pop_size, num_cases=4,
+    def __init__(self, num_cases=4,
                  file_name=None, training=False, worker_id=0):
-        self.pop_size = pop_size
         self.num_cases = num_cases
         self.env = None
         self.parameters_channel = EnvironmentParametersChannel()
@@ -25,8 +24,6 @@ class MlAgentsMultiWorld:
 
         config_channel = EngineConfigurationChannel()
         config_channel.set_configuration_parameters(
-            # width=84 if self.training else 512,
-            # height=84 if self.training else 512,
             width=1024,
             height=576,
             quality_level=0,
@@ -35,8 +32,6 @@ class MlAgentsMultiWorld:
             # capture_frame_rate=60
         )
 
-        # self.parameters_channel = EnvironmentParametersChannel()
-        # parameters_channel.set_float_parameter("angle", self.angle)
         self.env = UnityEnvironment(
             file_name=self.file_name,
             side_channels=[config_channel, self.parameters_channel],
@@ -58,14 +53,22 @@ class MlAgentsMultiWorld:
     def _evaluate_case(self, brains, case_id):
         n = len(brains)
         rewards = [0] * n
-        # if n != self.pop_size:
-        #     print("Pop size {} vs expected {}.".format(n, self.pop_size))
         num_done = 0
         self.parameters_channel.set_float_parameter("case_id", case_id)
         self.env.reset()
-        while num_done < len(brains):
+        while True:
             decision_steps, terminal_steps = \
                 self.env.get_steps(self.behavior_name)
+            for i in terminal_steps.agent_id:
+                if i >= n:
+                    continue
+                rewards[i] += terminal_steps[i].reward
+            num_done += len(terminal_steps)
+            if num_done == n:
+                break
+            if num_done > n:
+                raise ValueError
+
             for i in decision_steps.agent_id:
                 if i >= n:
                     continue
@@ -78,13 +81,5 @@ class MlAgentsMultiWorld:
                     i,
                     ActionTuple(continuous=np.array([action]))
                 )
-            for i in terminal_steps.agent_id:
-                if i >= n:
-                    continue
-                # print(terminal_steps[i].reward)
-                rewards[i] += terminal_steps[i].reward
-            num_done += len(terminal_steps)
             self.env.step()
-        # if n > self.pop_size:
-        #     rewards[self.pop_size:] = [rewards[0]] * (n - self.pop_size)
         return rewards
