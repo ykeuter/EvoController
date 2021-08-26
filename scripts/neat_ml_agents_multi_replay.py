@@ -9,6 +9,9 @@ from neat.nn import FeedForwardNetwork
 
 from evo_controller.worlds.ml_agents_multi_world \
     import MlAgentsMultiWorld
+from evo_controller.codecs.default_genome_encoder import (
+    DefaultGenomeEncoder
+)
 
 
 def run(config_file, checkpoint_file):
@@ -22,14 +25,15 @@ def run(config_file, checkpoint_file):
 
     fn = None
     # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(file_name=fn, training=False)
+    world = MlAgentsMultiWorld(file_name=fn)
     world.connect()
     # pop = neat.Checkpointer.restore_checkpoint(checkpoint_file)
     # phenos = [FeedForwardNetwork.create(g, config)
     #           for g in pop.population.values()]
     with open(checkpoint_file, "rb") as f:
         g = pickle.load(f)
-        phenos = [FeedForwardNetwork.create(g, config)]
+    print(DefaultGenomeEncoder().encode(g))
+    phenos = [FeedForwardNetwork.create(g, config)]
     tic = time.perf_counter()
     for _ in range(10):
         fitnesses = world.evaluate(phenos)
@@ -42,7 +46,7 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210825185209")
+                                "../results/20210826112911")
     config_file = os.path.join(results_path, "neat-ml-agents-multi.cfg")
     check_file = os.path.join(results_path, "neat-ml-agents-multi-689")
     check_file = os.path.join(results_path, "winner.pickle")

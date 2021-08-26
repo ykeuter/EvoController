@@ -9,15 +9,14 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, num_cases=4, pop_size=1,
-                 file_name=None, training=False, worker_id=0):
+    def __init__(self, num_cases=4,
+                 file_name=None, time_scale=None, worker_id=0):
         self.num_cases = num_cases
-        self.pop_size = pop_size
         self.env = None
         self.parameters_channel = EnvironmentParametersChannel()
         self.behavior_name = None
         self.file_name = file_name
-        self.training = training
+        self.time_scale = time_scale
         self.worker_id = worker_id
 
     def connect(self):
@@ -28,7 +27,7 @@ class MlAgentsMultiWorld:
             width=1024,
             height=576,
             quality_level=0,
-            time_scale=100 if self.training else 1,
+            time_scale=self.time_scale,
             target_frame_rate=-1,
             # capture_frame_rate=60
         )
@@ -52,44 +51,37 @@ class MlAgentsMultiWorld:
         return [sum(r) for r in zip(*list_of_rewards)]
 
     def _evaluate_case(self, brains, case_id):
-        n = len(brains)
-        rewards = [0] * n
+        rewards = [0] * len(brains)
         num_done = 0
+        self.env.step()  # make sure action buffer is empty
         self.parameters_channel.set_float_parameter("case_id", case_id)
         self.env.reset()
-        steps = 0
-        while True:
-            decision_steps, terminal_steps = \
-                self.env.get_steps(self.behavior_name)
-            if steps == 0:
-                if len(terminal_steps) > 0:
-                    raise ValueError
-                # self.ts = []
-            # self.ts.append(terminal_steps)
-            for i in terminal_steps.agent_id:
-                if i >= n:
-                    continue
-                rewards[i] += terminal_steps[i].reward
-            num_done += len(terminal_steps)
-            if num_done == self.pop_size:
-                break
-            if num_done > self.pop_size:
-                raise ValueError
-
+        decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
+        if len(terminal_steps) > 0:
+            raise ValueError
+        num_agents = len(decision_steps)
+        while num_done < num_agents:
             for i in decision_steps.agent_id:
-                if i >= n:
+                if i >= len(brains):
                     continue
                 obs = decision_steps[i].obs
                 # rewards[i] += decision_steps[i].reward
                 if abs(decision_steps[i].reward) > 0:
                     raise ValueError
                 action = brains[i].activate(np.ravel(obs))
-                # action = [0, 1]
                 self.env.set_action_for_agent(
                     self.behavior_name,
                     i,
                     ActionTuple(continuous=np.array([action]))
                 )
             self.env.step()
-            steps += 1
+            decision_steps, terminal_steps = \
+                self.env.get_steps(self.behavior_name)
+            for i in terminal_steps.agent_id:
+                if i >= len(brains):
+                    continue
+                rewards[i] += terminal_steps[i].reward
+            num_done += len(terminal_steps)
+            if num_done > num_agents:
+                raise ValueError
         return rewards

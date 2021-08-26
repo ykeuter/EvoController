@@ -10,6 +10,10 @@ from neat.nn import FeedForwardNetwork
 from evo_controller.worlds.ml_agents_multi_world \
     import MlAgentsMultiWorld
 
+from evo_controller.codecs.default_genome_encoder import (
+    DefaultGenomeEncoder
+)
+
 
 def run(config_file, log_path, n_generations=1000):
     shutil.copy2(config_file, log_path)
@@ -23,8 +27,7 @@ def run(config_file, log_path, n_generations=1000):
 
     fn = None
     # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
-    world = MlAgentsMultiWorld(file_name=fn, training=False,
-                               pop_size=config.pop_size)
+    world = MlAgentsMultiWorld(file_name=fn, time_scale=20)
     world.connect()
 
     def eval_genomes(genomes, config):
@@ -53,6 +56,7 @@ def run(config_file, log_path, n_generations=1000):
     winner = pop.run(eval_genomes, n_generations)
     toc = time.perf_counter()
     print("Evolution took {} seconds.".format(toc - tic))
+    print(DefaultGenomeEncoder().encode(winner))
     world.disconnect()
 
     with open(log_path / "winner.pickle", "wb") as f:
