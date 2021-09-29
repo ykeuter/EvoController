@@ -14,6 +14,8 @@ from evo_controller.codecs.default_genome_encoder import (
     DefaultGenomeEncoder
 )
 
+from pytorch_neat.hyper_linear_net import HyperLinearNet
+
 
 def run(config_file, log_path, n_generations=1000):
     shutil.copy2(config_file, log_path)
@@ -31,7 +33,15 @@ def run(config_file, log_path, n_generations=1000):
     world.connect()
 
     def eval_genomes(genomes, config):
-        phenos = [FeedForwardNetwork.create(g, config) for _, g in genomes]
+        coords = [
+            [-2, 2], [-1, 2], [1, 2], [2, 2],
+            [-2, 1], [-1, 1], [1, 1], [2, 1],
+            [-2, -1], [-1, -1], [1, -1], [2, -1],
+            [-2, -2], [-1, -2], [1, -2], [2, -2],
+        ]
+        # phenos = [FeedForwardNetwork.create(g, config) for _, g in genomes]
+        phenos = [
+            HyperLinearNet.create(g, config, coords, 2) for _, g in genomes]
         fitnesses = world.evaluate(phenos)
         for (_, genome), f in zip(genomes, fitnesses):
             genome.fitness = f
