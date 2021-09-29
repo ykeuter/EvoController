@@ -58,7 +58,7 @@ def run(config_file, log_path, n_generations=1000):
     # logger = LogReporter(fn, evaluator.eval_genome)
     # pop.add_reporter(logger)
 
-    prefix = log_path / "searchlight-"
+    prefix = log_path / "searchlight_hyper-"
     checker = neat.Checkpointer(10, None, filename_prefix=prefix)
     pop.add_reporter(checker)
 
@@ -75,7 +75,7 @@ def run(config_file, log_path, n_generations=1000):
 
 if __name__ == "__main__":
     root = pathlib.Path(__file__).parent.parent
-    config_file = root / "config/searchlight.cfg"
+    config_file = root / "config/searchlight_hyper.cfg"
     dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     log_path = root / "results" / dt
     log_path.mkdir()
