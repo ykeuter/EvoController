@@ -65,9 +65,9 @@ class MlAgentsMultiWorld:
                 if i >= len(brains):
                     continue
                 obs = decision_steps[i].obs
-                # rewards[i] += decision_steps[i].reward
-                if abs(decision_steps[i].reward) > 0:
-                    raise ValueError
+                rewards[i] += decision_steps[i].reward
+                # if abs(decision_steps[i].reward) > 0:
+                #     raise ValueError
                 action = brains[i].activate(np.ravel(obs))
                 self.env.set_action_for_agent(
                     self.behavior_name,
