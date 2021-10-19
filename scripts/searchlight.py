@@ -28,7 +28,7 @@ def run(config_file, log_path, n_generations=1000):
     )
 
     fn = None
-    fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
+    # fn = "C:\\Users\\ykeuter\\Projects\\EvoWorld\\app\\searchlight"
     world = MlAgentsMultiWorld(file_name=fn, time_scale=20)
     world.connect()
 
@@ -39,9 +39,9 @@ def run(config_file, log_path, n_generations=1000):
             [-2, -1], [-1, -1], [1, -1], [2, -1],
             [-2, -2], [-1, -2], [1, -2], [2, -2],
         ]
-        # phenos = [FeedForwardNetwork.create(g, config) for _, g in genomes]
-        phenos = [
-            HyperLinearNet.create(g, config, coords, 2) for _, g in genomes]
+        phenos = [FeedForwardNetwork.create(g, config) for _, g in genomes]
+        # phenos = [
+        #     HyperLinearNet.create(g, config, coords, 2) for _, g in genomes]
         fitnesses = world.evaluate(phenos)
         for (_, genome), f in zip(genomes, fitnesses):
             genome.fitness = f
@@ -58,7 +58,7 @@ def run(config_file, log_path, n_generations=1000):
     # logger = LogReporter(fn, evaluator.eval_genome)
     # pop.add_reporter(logger)
 
-    prefix = log_path / "searchlight_hyper-"
+    prefix = log_path / "checkpoint-"
     checker = neat.Checkpointer(10, None, filename_prefix=prefix)
     pop.add_reporter(checker)
 
@@ -75,7 +75,7 @@ def run(config_file, log_path, n_generations=1000):
 
 if __name__ == "__main__":
     root = pathlib.Path(__file__).parent.parent
-    config_file = root / "config/searchlight_hyper.cfg"
+    config_file = root / "config/searchlight-neat.cfg"
     dt = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     log_path = root / "results" / dt
     log_path.mkdir()

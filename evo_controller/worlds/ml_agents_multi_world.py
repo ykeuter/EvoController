@@ -9,7 +9,7 @@ import numpy as np
 
 
 class MlAgentsMultiWorld:
-    def __init__(self, num_cases=4,
+    def __init__(self, num_cases=1,
                  file_name=None, time_scale=None, worker_id=0):
         self.num_cases = num_cases
         self.env = None
