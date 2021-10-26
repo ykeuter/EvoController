@@ -46,8 +46,8 @@ def run(config_file, checkpoint_file):
 
 if __name__ == "__main__":
     results_path = os.path.join(os.path.dirname(__file__),
-                                "../results/20210831185238")
-    config_file = os.path.join(results_path, "searchlight.cfg")
-    check_file = os.path.join(results_path, "searchlight-689")
+                                "../results/20211026221418")
+    config_file = os.path.join(results_path, "searchlight-neat.cfg")
+    # check_file = os.path.join(results_path, "searchlight-689")
     check_file = os.path.join(results_path, "winner.pickle")
     run(config_file, check_file)
